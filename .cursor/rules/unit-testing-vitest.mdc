@@ -1,0 +1,296 @@
+---
+description: Guidelines for writing effective unit tests using Vitest in Next.js
+globs: 
+alwaysApply: false
+---
+---
+description: Unit Testing Best Practices for Next.js with Vitest
+globs: "**/*.{js,jsx,ts,tsx,test.js,test.jsx,test.ts,test.tsx,spec.js,spec.jsx,spec.ts,spec.tsx}"
+alwaysApply: false
+---
+
+# Unit Testing Best Practices for Next.js with Vitest
+
+This rule provides guidelines for writing effective and maintainable unit tests for our Next.js application using Vitest.
+
+## Core Testing Principles
+
+1. **Test Behavior, Not Implementation**: Focus on testing what components do, not how they do it.
+   - Test from the user's perspective
+   - Avoid testing internal implementation details
+   - Use user-centric queries from React Testing Library
+
+2. **Write Independent Tests**: Each test should be isolated and not depend on others.
+   - Reset state between tests
+   - Mock external dependencies
+   - Avoid test order dependencies
+
+3. **Follow AAA Pattern**: Structure tests using Arrange-Act-Assert.
+   - Arrange: Set up test data and conditions
+   - Act: Perform the action being tested
+   - Assert: Verify the results
+
+## Vitest Setup
+
+Our project uses:
+- Vitest as the test runner (faster alternative to Jest)
+- React Testing Library for component testing
+- jsdom for DOM environment simulation
+
+### Project Configuration
+
+```typescript
+// vitest.config.ts
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
+export default defineConfig({
+  plugins: [react(), tsconfigPaths()],
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: './vitest-setup.ts',
+  },
+});
+
+// vitest-setup.ts
+import '@testing-library/jest-dom';
+```
+
+### Basic Test Structure
+```tsx
+// Component.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import Component from './Component';
+
+describe('Component', () => {
+  it('should render correctly', () => {
+    // Arrange
+    render(<Component />);
+    
+    // Assert
+    expect(screen.getByRole('heading')).toBeInTheDocument();
+  });
+  
+  it('should update when user interacts', async () => {
+    // Arrange
+    render(<Component />);
+    
+    // Act
+    await userEvent.click(screen.getByRole('button'));
+    
+    // Assert
+    expect(screen.getByText('Updated')).toBeInTheDocument();
+  });
+});
+```
+
+### Testing Pure Components
+
+For functional components without side effects:
+
+1. Test that component renders correctly with different props
+2. Test conditional rendering logic
+3. Test prop callbacks are called with correct arguments
+
+```tsx
+it('should call onSubmit with form data when submitted', async () => {
+  // Arrange
+  const handleSubmit = vi.fn();
+  render(<Form onSubmit={handleSubmit} />);
+  
+  // Act
+  await userEvent.type(screen.getByLabelText('Name'), 'Test User');
+  await userEvent.click(screen.getByRole('button', { name: /submit/i }));
+  
+  // Assert
+  expect(handleSubmit).toHaveBeenCalledWith({ name: 'Test User' });
+});
+```
+
+### Testing Components with Hooks
+
+When testing components that use React hooks:
+
+1. Test the component renders in each possible state
+2. Test state transitions when events occur
+3. Mock any external hooks the component depends on
+
+```tsx
+it('should show loading state initially and then data', async () => {
+  // Mock useData hook
+  vi.mock('../hooks/useData', () => ({
+    useData: () => ({ 
+      data: [{ id: 1, name: 'Item 1' }], 
+      loading: false 
+    })
+  }));
+  
+  // Arrange
+  render(<DataList />);
+  
+  // Assert - no loading spinner, data is shown
+  expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  expect(screen.getByText('Item 1')).toBeInTheDocument();
+});
+```
+
+### Testing Next.js Specific Features
+
+#### Testing Pages with getServerSideProps/getStaticProps
+
+For pages with data fetching:
+
+1. Test the component with mock props (similar to regular components)
+2. Test the data fetching function separately
+
+```tsx
+// Page component test
+it('should render page with props', () => {
+  // Arrange
+  const mockProps = { data: [{ id: 1, title: 'Post 1' }] };
+  render(<BlogPage {...mockProps} />);
+  
+  // Assert
+  expect(screen.getByText('Post 1')).toBeInTheDocument();
+});
+
+// Data fetching function test
+it('getServerSideProps should return correct props', async () => {
+  // Mock fetch
+  global.fetch = vi.fn().mockResolvedValue({
+    json: vi.fn().mockResolvedValue([{ id: 1, title: 'Post 1' }])
+  });
+  
+  // Act
+  const result = await getServerSideProps({ params: { id: '1' } });
+  
+  // Assert
+  expect(result).toEqual({
+    props: { data: [{ id: 1, title: 'Post 1' }] }
+  });
+});
+```
+
+#### Testing Client Components
+
+For client components with 'use client' directive:
+
+1. Use jsdom environment in Vitest
+2. Test user interactions with userEvent
+3. Test that state updates correctly after events
+
+## Mocking Common Dependencies
+
+### Mocking Next Router
+
+```tsx
+// Mock next/router
+vi.mock('next/router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    query: { id: '1' },
+    pathname: '/test'
+  })
+}));
+```
+
+### Mocking next/image
+```tsx
+// Mock next/image
+vi.mock('next/image', () => ({
+  __esModule: true,
+  default: (props) => {
+    // eslint-disable-next-line jsx-a11y/alt-text
+    return <img {...props} />
+  }
+}));
+```
+
+## Testing Custom Hooks
+
+For testing custom hooks, use the renderHook utility:
+
+```tsx
+import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import useCounter from './useCounter';
+
+describe('useCounter', () => {
+  it('should increment counter', () => {
+    // Arrange
+    const { result } = renderHook(() => useCounter(0));
+    
+    // Act
+    act(() => {
+      result.current.increment();
+    });
+    
+    // Assert
+    expect(result.current.count).toBe(1);
+  });
+});
+```
+
+## Best Practices
+
+1. Use Descriptive Test Names: Format: it('should [expected behavior] when [condition]')
+2. Use Data-Testid Sparingly: Prefer accessible queries (getByRole, getByLabelText)
+    - Only use data-testid when no better option exists
+3. Test Accessibility: Ensure components are accessible
+    - Test keyboard navigation
+    - Verify ARIA attributes
+4. Keep Tests Fast: Tests should execute quickly
+    - Use Vitest's watch mode for development
+    - Utilize parallelism for test suites
+5. Avoid Snapshot Tests: Use with caution
+    - Only snapshot stable UI components
+    - Review snapshots carefully when they change
+
+@testing-examples.tsx
+```tsx
+// Example component
+import { useState } from 'react';
+
+export function Counter({ initialCount = 0 }) {
+  const [count, setCount] = useState(initialCount);
+  
+  return (
+    <div>
+      <h1>Count: {count}</h1>
+      <button onClick={() => setCount(count + 1)}>Increment</button>
+      <button onClick={() => setCount(count - 1)}>Decrement</button>
+    </div>
+  );
+}
+```
+```tsx
+// Example test
+// Counter.test.tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Counter } from './Counter';
+
+describe('Counter', () => {
+  it('renders with initial count', () => {
+    render(<Counter initialCount={5} />);
+    expect(screen.getByText('Count: 5')).toBeInTheDocument();
+  });
+
+  it('increments count when increment button is clicked', async () => {
+    render(<Counter initialCount={5} />);
+    await userEvent.click(screen.getByText('Increment'));
+    expect(screen.getByText('Count: 6')).toBeInTheDocument();
+  });
+
+  it('decrements count when decrement button is clicked', async () => {
+    render(<Counter initialCount={5} />);
+    await userEvent.click(screen.getByText('Decrement'));
+    expect(screen.getByText('Count: 4')).toBeInTheDocument();
+  });
+});
+```
