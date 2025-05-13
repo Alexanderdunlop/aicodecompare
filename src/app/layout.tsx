@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import Image from 'next/image';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -27,22 +28,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Navbar
-          logo={<Image src="/logo.svg" alt={`${title} logo`} width={40} height={16} priority />}
-          title={title}
-          links={[
-            { href: '/', label: 'Home' },
-            { href: '/about', label: 'About' },
-            { href: '/contact', label: 'Contact' },
-          ]}
-        />
-        {children}
-        {children}
-        {children}
-        {children}
-        {children}
+        <ThemeProvider>
+          <Navbar
+            logo={<Image src="/logo.svg" alt={`${title} logo`} width={40} height={16} priority />}
+            title={title}
+            links={[
+              { href: '/', label: 'Home' },
+              { href: '/about', label: 'About' },
+              { href: '/contact', label: 'Contact' },
+            ]}
+          />
+          {children}
+          {children}
+          {children}
+          {children}
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
