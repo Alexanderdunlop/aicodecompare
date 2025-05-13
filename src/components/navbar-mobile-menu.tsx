@@ -41,7 +41,7 @@ export const NavbarMobileMenu: FC<NavbarMobileMenuProps> = ({ links, title }) =>
               <Link
                 key={href}
                 href={href}
-                className="px-2 py-1 text-gray-800 dark:text-gray-100 hover:underline font-medium"
+                className="px-2 py-1 text-foreground hover:underline font-medium"
                 onClick={() => setIsOpen(false)}
               >
                 {label}

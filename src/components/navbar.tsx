@@ -16,14 +16,14 @@ export type NavbarProps = {
 
 export const Navbar: FC<NavbarProps> = ({ links, logo, title }) => {
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-black backdrop-blur supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:dark:bg-black/80 py-4 px-6 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 w-full border-b border-accent dark:border-accent bg-background backdrop-blur supports-[backdrop-filter]:bg-background/80 py-4 px-6 flex items-center justify-between">
       <div className="flex items-center gap-6 flex-1 min-w-0">
         <Link
           href="/"
-          className="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded shrink-0"
+          className="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded shrink-0"
         >
           {logo}
-          <span className="hidden md:inline text-xl font-semibold tracking-tight text-gray-900 dark:text-gray-100 select-none">
+          <span className="hidden md:inline text-xl font-semibold tracking-tight text-foreground dark:text-foreground select-none">
             {title}
           </span>
         </Link>
@@ -31,10 +31,7 @@ export const Navbar: FC<NavbarProps> = ({ links, logo, title }) => {
         <ul className="hidden md:flex gap-6">
           {links.map(({ href, label }) => (
             <li key={href}>
-              <Link
-                href={href}
-                className="text-gray-800 dark:text-gray-100 hover:underline font-medium"
-              >
+              <Link href={href} className="text-foreground hover:underline font-medium">
                 {label}
               </Link>
             </li>
