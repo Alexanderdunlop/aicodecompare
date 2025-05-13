@@ -3,7 +3,7 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { useIsMounted } from 'usehooks-ts';
+import { useIsMounted } from '@/lib/hooks/useIsMounted';
 
 const getNextTheme = (currentTheme: string | undefined) =>
   currentTheme === 'dark' ? 'light' : 'dark';
