@@ -1,0 +1,181 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Functional Programming Guidelines for Next.js
+globs: "**/*.{js,jsx,ts,tsx}"
+alwaysApply: false
+---
+
+# Functional Programming Guidelines for Next.js
+
+This codebase follows functional programming principles. When writing or modifying code, please adhere to these guidelines:
+
+## Core Principles
+
+1. **Pure Functions**: Functions should have no side effects and be deterministic.
+   - Input parameters should determine the output completely
+   - No reliance on external state or mutation of external data
+   - No network requests, console logs, or file operations inside pure functions
+
+2. **Immutability**: Never mutate data; create new copies with changes.
+   - Use spread operators, Object.assign, or libraries like Immer
+   - Prefer const over let
+   - Use array methods like map, filter, reduce instead of mutations
+
+3. **Function Composition**: Build complex operations from simple functions.
+   - Create small, reusable functions that do one thing well
+   - Combine them to create more complex behavior
+
+4. **Higher-Order Functions**: Functions can receive and return other functions.
+   - Use functions like map, filter, reduce
+   - Implement custom HOFs for repeated patterns
+
+5. **Isolation of Side Effects**: Contain impurity at the edges of the application.
+   - Keep React components pure where possible
+   - Isolate API calls, DOM manipulation, and state changes
+
+## Next.js Specific Patterns
+
+1. **Server Components**: Use pure functions for server components wherever possible.
+   - Server components should transform data without side effects
+   - Keep side effects in separate utility functions
+
+2. **Client Components**: Isolate side effects to useEffect and event handlers.
+   - Component rendering should be pure
+   - State updates should create new state, not mutate existing state
+
+3. **Data Fetching**: Isolate data fetching logic.
+   - Use patterns like SWR or React Query to manage remote state
+   - Create pure transformation functions separate from fetching logic
+
+## Code Examples
+
+### Pure Function Example:
+```tsx
+// GOOD: Pure function
+function calculateTotal(items) {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}
+
+// BAD: Impure function
+function calculateTotal(items) {
+  let total = 0;
+  for (const item of items) {
+    total += item.price;
+    console.log(`Added ${item.price}`); // Side effect!
+  }
+  return total;
+}
+```
+### Immutability Example:
+```tsx
+// GOOD: Immutable update
+function addItem(items, newItem) {
+  return [...items, newItem];
+}
+
+// BAD: Mutating update
+function addItem(items, newItem) {
+  items.push(newItem); // Mutation!
+  return items;
+}
+```
+### Higher-Order Function Example:
+```tsx
+// GOOD: Higher-order function
+const withLogging = (fn) => (...args) => {
+  console.log(`Calling with args: ${JSON.stringify(args)}`);
+  return fn(...args);
+};
+
+const calculateTotal = withLogging((items) => 
+  items.reduce((sum, item) => sum + item.price, 0)
+);
+```
+### Managing Impurity in Next.js:
+```tsx
+// GOOD: Pure component with isolated effects
+'use client';
+
+import { useState } from 'react';
+import { fetchData } from '../lib/api';
+
+// Pure function for transforming data
+const processApiData = (data) => {
+  return data.map(item => ({
+    ...item,
+    displayName: `${item.name} (${item.category})`
+  }));
+};
+
+export default function ProductList() {
+  const [products, setProducts] = useState([]);
+  
+  // Side effect isolated in event handler
+  const handleFetchProducts = async () => {
+    const data = await fetchData('/api/products');
+    // Process with pure function
+    setProducts(processApiData(data));
+  };
+
+  // Pure rendering
+  return (
+    <div>
+      <button onClick={handleFetchProducts}>Load Products</button>
+      <ul>
+        {products.map(product => (
+          <li key={product.id}>{product.displayName}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+Remember that functional programming is a principle to strive for, not a strict rule. Sometimes practical considerations require deviations, but isolate those cases.
+
+@functional-utils.ts
+```typescript
+// Collection of pure utility functions for functional programming
+
+/**
+ * Composes functions from right to left
+ */
+export const compose = (...fns) => (x) => 
+  fns.reduceRight((y, f) => f(y), x);
+
+/**
+ * Pipes functions from left to right
+ */
+export const pipe = (...fns) => (x) => 
+  fns.reduce((y, f) => f(y), x);
+
+/**
+ * Creates a memoized version of a function
+ */
+export const memoize = (fn) => {
+  const cache = new Map();
+  return (...args) => {
+    const key = JSON.stringify(args);
+    if (!cache.has(key)) {
+      cache.set(key, fn(...args));
+    }
+    return cache.get(key);
+  };
+};
+
+/**
+ * Curries a function to allow partial application
+ */
+export const curry = (fn) => {
+  const arity = fn.length;
+  return function curried(...args) {
+    if (args.length >= arity) {
+      return fn(...args);
+    }
+    return (...moreArgs) => curried(...args, ...moreArgs);
+  };
+};
+```
