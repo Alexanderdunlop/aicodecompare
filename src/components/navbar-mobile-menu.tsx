@@ -7,7 +7,9 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Button } from '@/components/ui/button';
 import type { NavbarProps } from './navbar';
 
-export const NavbarMobileMenu: FC<NavbarProps> = ({ links, logo, title }) => {
+type NavbarMobileMenuProps = Omit<NavbarProps, 'logo'>;
+
+export const NavbarMobileMenu: FC<NavbarMobileMenuProps> = ({ links, title }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -34,10 +36,6 @@ export const NavbarMobileMenu: FC<NavbarProps> = ({ links, logo, title }) => {
           {title}
         </SheetTitle>
         <div className="flex flex-col gap-4 py-4">
-          <Link href="/" className="flex items-center gap-3 px-2" onClick={() => setIsOpen(false)}>
-            {logo}
-            <span className="text-xl font-semibold tracking-tight">{title}</span>
-          </Link>
           <div className="flex flex-col space-y-3 mt-4">
             {links.map(({ href, label }) => (
               <Link

@@ -13,8 +13,7 @@ export type NavbarProps = {
   title: string;
 };
 
-export const Navbar: FC<NavbarProps> = (props) => {
-  const { links, logo, title } = props;
+export const Navbar: FC<NavbarProps> = ({ links, logo, title }) => {
   return (
     <nav className="sticky top-0 z-50 w-full flex items-center justify-between py-4 px-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-black backdrop-blur supports-[backdrop-filter]:bg-white/80 supports-[backdrop-filter]:dark:bg-black/80">
       <Link
@@ -39,7 +38,7 @@ export const Navbar: FC<NavbarProps> = (props) => {
           </li>
         ))}
       </ul>
-      <NavbarMobileMenu {...props} />
+      <NavbarMobileMenu title={title} links={links} />
     </nav>
   );
 };
