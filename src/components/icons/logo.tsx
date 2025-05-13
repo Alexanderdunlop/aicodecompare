@@ -1,21 +1,7 @@
 import { SVGProps, FC } from 'react';
 
-interface LogoProps extends SVGProps<SVGSVGElement> {
-  width?: number | string;
-  height?: number | string;
-  stroke?: string;
-}
-
-export const Logo: FC<LogoProps> = ({ width = 154, height = 114, className = '', ...props }) => (
-  <svg
-    width={width}
-    height={height}
-    viewBox="0 0 154 114"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    {...props}
-  >
+export const Logo: FC<SVGProps<SVGSVGElement>> = (props) => (
+  <svg viewBox="0 0 154 114" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <g clipPath="url(#clip0_14_65)">
       <path
         d="M37 7L7 57L37 107"

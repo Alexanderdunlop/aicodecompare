@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { FC } from 'react';
 import { NavbarMobileMenu } from './navbar-mobile-menu';
 import { DarkModeToggle } from './dark-mode-toggle';
+import { GitHubLogo } from './icons/github-logo';
+import { Button } from './ui/button';
 
 type NavbarLink = {
   href: string;
@@ -13,6 +15,19 @@ export type NavbarProps = {
   logo: React.ReactNode;
   title: string;
 };
+
+const GitHubButton: FC = () => (
+  <Button asChild variant="ghost" size="icon" aria-label="GitHub Repository">
+    <a
+      href="https://github.com/Alexanderdunlop/aicodecompare"
+      target="_blank"
+      rel="noopener noreferrer"
+      tabIndex={-1}
+    >
+      <GitHubLogo className="w-5 h-5 text-foreground" />
+    </a>
+  </Button>
+);
 
 export const Navbar: FC<NavbarProps> = ({ links, logo, title }) => {
   return (
@@ -39,6 +54,7 @@ export const Navbar: FC<NavbarProps> = ({ links, logo, title }) => {
         </ul>
       </div>
       <div className="flex items-center gap-2">
+        <GitHubButton />
         <DarkModeToggle />
         <div className="md:hidden">
           <NavbarMobileMenu title={title} links={links} />

@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Navbar } from '@/components/navbar';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Logo } from '@/components/logo';
+import { Logo } from '@/components/icons/logo';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,7 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Navbar
-            logo={<Logo className="stroke-foreground" width={32} height={24} />}
+            logo={<Logo className="stroke-foreground w-8 h-6" />}
             title={title}
             links={[{ href: '/', label: 'Home' }]}
           />
