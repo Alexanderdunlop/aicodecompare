@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { FC } from 'react';
 import { NavbarMobileMenu } from './navbar-mobile-menu';
-import { DarkModeToggle } from './dark-mode-toggle';
+import { DarkModeToggle } from './theme/dark-mode-toggle';
 import { GitHubLogo } from './icons/github-logo';
 import { Button } from './ui/button';
 

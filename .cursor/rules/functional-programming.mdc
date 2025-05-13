@@ -11,130 +11,162 @@ alwaysApply: false
 
 # Functional Programming Guidelines for Next.js
 
-This codebase follows functional programming principles. When writing or modifying code, please adhere to these guidelines:
+This codebase follows functional programming principles to ensure code is predictable, testable, and maintainable. Please adhere to these guidelines when writing or modifying code.
+
+---
+
+## Why Functional Programming?
+
+- **Predictability:** Pure functions always return the same output for the same input.
+- **Testability:** Isolated logic is easier to test.
+- **Maintainability:** Immutability and composition reduce bugs and complexity.
+
+---
 
 ## Core Principles
 
-1. **Pure Functions**: Functions should have no side effects and be deterministic.
-   - Input parameters should determine the output completely
-   - No reliance on external state or mutation of external data
-   - No network requests, console logs, or file operations inside pure functions
+### 1. Pure Functions
 
-2. **Immutability**: Never mutate data; create new copies with changes.
-   - Use spread operators, Object.assign, or libraries like Immer
-   - Prefer const over let
-   - Use array methods like map, filter, reduce instead of mutations
+**Do:**
+- Write functions that depend only on their input parameters.
+- Ensure functions have no side effects (no network, logging, or mutation).
 
-3. **Function Composition**: Build complex operations from simple functions.
-   - Create small, reusable functions that do one thing well
-   - Combine them to create more complex behavior
+**Don't:**
+- Rely on or mutate external state.
+- Perform I/O or side effects inside pure functions.
 
-4. **Higher-Order Functions**: Functions can receive and return other functions.
-   - Use functions like map, filter, reduce
-   - Implement custom HOFs for repeated patterns
-
-5. **Isolation of Side Effects**: Contain impurity at the edges of the application.
-   - Keep React components pure where possible
-   - Isolate API calls, DOM manipulation, and state changes
-
-## Next.js Specific Patterns
-
-1. **Server Components**: Use pure functions for server components wherever possible.
-   - Server components should transform data without side effects
-   - Keep side effects in separate utility functions
-
-2. **Client Components**: Isolate side effects to useEffect and event handlers.
-   - Component rendering should be pure
-   - State updates should create new state, not mutate existing state
-
-3. **Data Fetching**: Isolate data fetching logic.
-   - Use patterns like SWR or React Query to manage remote state
-   - Create pure transformation functions separate from fetching logic
-
-## Code Examples
-
-### Pure Function Example:
+**Example:**
 ```tsx
-// GOOD: Pure function
-function calculateTotal(items) {
-  return items.reduce((sum, item) => sum + item.price, 0);
+// GOOD
+function sum(items) {
+  return items.reduce((a, b) => a + b, 0);
 }
 
-// BAD: Impure function
-function calculateTotal(items) {
+// BAD
+function sum(items) {
   let total = 0;
-  for (const item of items) {
-    total += item.price;
-    console.log(`Added ${item.price}`); // Side effect!
-  }
+  items.forEach(item => {
+    total += item;
+    console.log(item); // Side effect!
+  });
   return total;
 }
 ```
-### Immutability Example:
+
+---
+
+### 2. Immutability
+
+**Do:**
+- Use spread operators, `Object.assign`, or libraries like Immer.
+- Prefer `const` over `let`.
+- Use array methods like `map`, `filter`, `reduce`.
+
+**Don't:**
+- Mutate objects or arrays directly.
+
+**Example:**
 ```tsx
-// GOOD: Immutable update
+// GOOD
 function addItem(items, newItem) {
   return [...items, newItem];
 }
 
-// BAD: Mutating update
+// BAD
 function addItem(items, newItem) {
   items.push(newItem); // Mutation!
   return items;
 }
 ```
-### Higher-Order Function Example:
+
+---
+
+### 3. Function Composition
+
+**Do:**
+- Build complex logic by combining small, single-purpose functions.
+- Use `compose` or `pipe` utilities.
+
+**Example:**
+```typescript
+import { compose, pipe } from '../functional-utils';
+
+const double = x => x * 2;
+const increment = x => x + 1;
+
+const doubleThenIncrement = pipe(double, increment);
+```
+
+---
+
+### 4. Higher-Order Functions
+
+**Do:**
+- Use and create functions that accept or return other functions.
+- Prefer array methods and custom HOFs for repeated patterns.
+
+**Example:**
 ```tsx
-// GOOD: Higher-order function
-const withLogging = (fn) => (...args) => {
-  console.log(`Calling with args: ${JSON.stringify(args)}`);
+const withLogging = fn => (...args) => {
+  console.log(args);
   return fn(...args);
 };
-
-const calculateTotal = withLogging((items) => 
-  items.reduce((sum, item) => sum + item.price, 0)
-);
 ```
-### Managing Impurity in Next.js:
-```tsx
-// GOOD: Pure component with isolated effects
-'use client';
 
+---
+
+### 5. Isolation of Side Effects
+
+**Do:**
+- Contain side effects at the edges (e.g., in event handlers, `useEffect`, or API utilities).
+- Keep React components and transformation logic pure.
+
+**Example:**
+```tsx
+'use client';
 import { useState } from 'react';
 import { fetchData } from '../lib/api';
 
-// Pure function for transforming data
-const processApiData = (data) => {
-  return data.map(item => ({
-    ...item,
-    displayName: `${item.name} (${item.category})`
-  }));
-};
+const processApiData = data =>
+  data.map(item => ({ ...item, displayName: `${item.name} (${item.category})` }));
 
 export default function ProductList() {
   const [products, setProducts] = useState([]);
-  
-  // Side effect isolated in event handler
-  const handleFetchProducts = async () => {
+  const handleFetch = async () => {
     const data = await fetchData('/api/products');
-    // Process with pure function
     setProducts(processApiData(data));
   };
-
-  // Pure rendering
   return (
     <div>
-      <button onClick={handleFetchProducts}>Load Products</button>
+      <button onClick={handleFetch}>Load</button>
       <ul>
-        {products.map(product => (
-          <li key={product.id}>{product.displayName}</li>
-        ))}
+        {products.map(p => <li key={p.id}>{p.displayName}</li>)}
       </ul>
     </div>
   );
 }
 ```
-Remember that functional programming is a principle to strive for, not a strict rule. Sometimes practical considerations require deviations, but isolate those cases.
+
+---
+
+## Next.js Patterns
+
+- **Server Components:** Use pure functions for data transformation. Isolate side effects in separate utilities.
+- **Client Components:** Keep rendering pure. Isolate side effects in `useEffect` or event handlers.
+- **Data Fetching:** Use SWR/React Query for remote state. Keep transformation logic pure and separate.
+
+---
+
+## Utilities
+
+See [`functional-utils.ts`](mdc:functional-utils.ts) for reusable helpers:
+- `compose`, `pipe`, `memoize`, `curry`
+
+---
+
+## Summary
+
+Functional programming is a principle to strive for. Isolate exceptions and document them. When in doubt, prefer purity, immutability, and composition.
 
 @functional-utils.ts
 ```typescript

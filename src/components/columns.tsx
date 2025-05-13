@@ -1,0 +1,85 @@
+'use client';
+
+import type { ColumnDef, Row } from '@tanstack/react-table';
+import { MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+export type Product = {
+  id: string;
+  name: string;
+  price: number;
+  costPerApi: number;
+};
+
+export const columns: ColumnDef<Product>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Product',
+  },
+  {
+    accessorKey: 'price',
+    header: () => <div className="text-right">Price</div>,
+    cell: ({ row }: { row: Row<Product> }) => {
+      const price = parseFloat(row.getValue('price'));
+      const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(price);
+      return <div className="text-right font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: 'costPerApi',
+    header: () => <div className="text-right">Cost per API</div>,
+    cell: ({ row }: { row: Row<Product> }) => {
+      const cost = parseFloat(row.getValue('costPerApi'));
+      const formatted = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      }).format(cost);
+      return <div className="text-right">{formatted}</div>;
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({ row }: { row: Row<Product> }) => {
+      const product = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id)}>
+              Copy product ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => alert(`Viewing ${product.name}`)}>
+              View product
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => alert(`Edit ${product.name}`)}>
+              Edit product
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => alert(`Delete ${product.name}`)}>
+              Delete product
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+    enableSorting: false,
+    enableHiding: false,
+  },
+];
