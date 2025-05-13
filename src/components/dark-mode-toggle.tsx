@@ -5,20 +5,29 @@ import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useIsMounted } from 'usehooks-ts';
 
+const getNextTheme = (currentTheme: string | undefined) =>
+  currentTheme === 'dark' ? 'light' : 'dark';
+
 export const DarkModeToggle = () => {
   const { resolvedTheme, setTheme } = useTheme();
   const isMounted = useIsMounted();
 
   if (!isMounted) return null;
 
-  const isDark = resolvedTheme === 'dark';
-  const toggleTheme = () => {
-    setTheme(isDark ? 'light' : 'dark');
+  const handleToggleTheme = () => {
+    const nextTheme = getNextTheme(resolvedTheme);
+    setTheme(nextTheme);
   };
 
+  const isDark = resolvedTheme === 'dark';
+
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle dark mode">
-      {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+    <Button variant="ghost" size="icon" onClick={handleToggleTheme} aria-label="Toggle dark mode">
+      {isDark ? (
+        <Sun data-testid="sun-icon" className="h-5 w-5" />
+      ) : (
+        <Moon data-testid="moon-icon" className="h-5 w-5" />
+      )}
       <span className="sr-only">Toggle theme</span>
     </Button>
   );

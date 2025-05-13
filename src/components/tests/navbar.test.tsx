@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
-import { Navbar } from './navbar';
+import { Navbar } from '../navbar';
 import userEvent from '@testing-library/user-event';
 
 const title = 'AI Code Compare';
