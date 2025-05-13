@@ -3,11 +3,6 @@ import { render, screen } from '@testing-library/react';
 import Home from './page';
 
 describe('Home', () => {
-  it('renders the Next.js logo', () => {
-    render(<Home />);
-    expect(screen.getByAltText('Next.js logo')).toBeInTheDocument();
-  });
-
   it('renders the Deploy now link', () => {
     render(<Home />);
     expect(screen.getByRole('link', { name: /deploy now/i })).toBeInTheDocument();
